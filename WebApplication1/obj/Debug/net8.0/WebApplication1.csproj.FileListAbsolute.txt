@@ -1,0 +1,9 @@
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.csproj.AssemblyReference.cache
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.GeneratedMSBuildEditorConfig.editorconfig
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.AssemblyInfoInputs.cache
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.AssemblyInfo.cs
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.csproj.CoreCompileInputs.cache
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cs
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cache
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.RazorAssemblyInfo.cache
+/Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.RazorAssemblyInfo.cs

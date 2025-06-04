@@ -1,0 +1,1 @@
+/Users/dev16/temp_project/obj/Release/net8.0/WebApplication1.csproj.AssemblyReference.cache
