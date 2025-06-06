@@ -35,14 +35,13 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins(
-                    "https://raghavvag.github.io",
-                    "http://127.0.0.1:5501",  // Local development server
-                    "http://localhost:5501",    // Alternative local development server
-                    "http://localhost:3000"     // React frontend
+                    "https://smart-trackingg.vercel.app",
+                    "https://f737-103-180-214-187.ngrok-free.app"
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials();  // Allow credentials if you're sending cookies/auth
+                .AllowCredentials()
+                .SetIsOriginAllowed(origin => true); // Backup to ensure all origins are allowed during testing
         });
 });
 

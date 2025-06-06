@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using SmartTrackingg.Services;
+using SmartTrackingg.Models;
 
 namespace SmartTrackingg.Controllers
 {
@@ -15,6 +17,12 @@ namespace SmartTrackingg.Controllers
         {
             _emailService = emailService;
             _smsService = smsService;
+        }
+
+        private string GenerateOtp()
+        {
+            Random random = new Random();
+            return random.Next(100000, 999999).ToString();
         }
 
         [HttpPost("test-email")]

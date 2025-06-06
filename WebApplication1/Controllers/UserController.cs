@@ -16,6 +16,21 @@ namespace WebApplication1.Controllers
             _context = context;
         }
 
+        // POST: api/User/login
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email && u.Password == loginRequest.Password);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid credentials");
+            }
+
+            return Ok(new { message = "Login successful", user = new { user.Id, user.FirstName, user.LastName, user.Email, user.Role } });
+        }
+
         // POST: api/User
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User user)
