@@ -15,15 +15,8 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     const userId = localStorage.getItem('userId');
-    const userRole = localStorage.getItem('userRole');
     if (userId) {
-      if (userRole === 'Admin') {
-        navigate('/admin-dashboard');
-      } else if (userRole === 'Handler') {
-        navigate('/handler-dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/dashboard');
     }
   }, [navigate]);
 
@@ -44,24 +37,26 @@ const Login = () => {
       const response = await apiClient.post('/user/login', formData);
       console.log('Login response:', response.data);
       
-      const { user, message } = response.data;
+      // Correctly extract user from response.data
+      const userData = response.data.user;
 
       // Store user data in localStorage
-      localStorage.setItem('userId', user.id.toString());
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userName', `${user.firstName} ${user.lastName}`);
-      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('userId', userData.id.toString());
+      localStorage.setItem('userEmail', userData.email);
+      localStorage.setItem('userName', `${userData.firstName} ${userData.lastName}`);
+      
+      // Set role in localStorage
+      localStorage.setItem('userRole', userData.role.toLowerCase());
 
-      // Navigate based on role
-      if (user.role === 'Admin') {
-        localStorage.setItem('adminUser', JSON.stringify(user));
-        navigate('/admin-dashboard');
-      } else if (user.role === 'Handler') {
-        localStorage.setItem('handlerUser', JSON.stringify(user));
-        navigate('/handler-dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      // Debug output
+      console.log('Stored user data:', {
+        id: userData.id,
+        email: userData.email,
+        name: `${userData.firstName} ${userData.lastName}`,
+        role: userData.role
+      });
+
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError(err.response?.data || 'Login failed. Please check your credentials and try again.');

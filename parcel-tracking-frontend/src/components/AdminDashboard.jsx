@@ -19,18 +19,13 @@ const AdminDashboard = () => {
     const userData = localStorage.getItem('adminUser');
     const userRole = localStorage.getItem('userRole');
     
-    if (!userData || userRole !== 'Admin') {
+    if (!userData || userRole !== 'admin') {
       navigate('/admin-login');
       return;
     }
     
-    try {
-      setAdminUser(JSON.parse(userData));
-      fetchDashboardData();
-    } catch (error) {
-      console.error('Error parsing admin user data:', error);
-      navigate('/admin-login');
-    }
+    setAdminUser(JSON.parse(userData));
+    fetchDashboardData();
   }, [navigate]);
 
   const fetchDashboardData = async () => {

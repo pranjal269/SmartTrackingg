@@ -5,7 +5,6 @@ import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import CreateShipment from './components/CreateShipment';
 import TrackShipment from './components/TrackShipment';
-import DirectTrackShipment from './components/DirectTrackShipment';
 import OtpVerification from './components/OtpVerification';
 import HandlerLogin from './components/HandlerLogin';
 import HandlerDashboard from './components/HandlerDashboard';
@@ -133,7 +132,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/track-shipment" element={<TrackShipment />} />
-          <Route path="/track/:trackingId" element={<DirectTrackShipment />} />
           <Route 
             path="/dashboard" 
             element={
