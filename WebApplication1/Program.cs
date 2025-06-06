@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
-using WebApplication1.Services;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,12 +43,6 @@ builder.Services.AddCors(options =>
                 .SetIsOriginAllowed(origin => true); // Backup to ensure all origins are allowed during testing
         });
 });
-
-// Add service registrations
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ISmsService, SmsService>();
-builder.Services.AddScoped<ITrackingService, TrackingService>();
-builder.Services.AddScoped<IQRCodeService, QRCodeService>();
 
 var app = builder.Build();
 

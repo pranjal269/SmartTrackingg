@@ -34,7 +34,7 @@ const Login = () => {
 
     try {
       console.log('Attempting login with:', formData);
-      const response = await apiClient.post('/user/login', formData);
+      const response = await apiClient.post('/login', formData);
       console.log('Login response:', response.data);
       
       // Correctly extract user from response.data
