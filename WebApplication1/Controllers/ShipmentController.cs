@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApplication1.Data;
 using WebApplication1.Models;
-using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
@@ -14,23 +14,10 @@ namespace WebApplication1.Controllers
     public class ShipmentController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IEmailService _emailService;
-        private readonly ISmsService _smsService;
-        private readonly ITrackingService _trackingService;
-        private readonly IQRCodeService _qrCodeService;
 
-        public ShipmentController(
-            ApplicationDbContext context,
-            IEmailService emailService,
-            ISmsService smsService,
-            ITrackingService trackingService,
-            IQRCodeService qrCodeService)
+        public ShipmentController(ApplicationDbContext context)
         {
             _context = context;
-            _emailService = emailService;
-            _smsService = smsService;
-            _trackingService = trackingService;
-            _qrCodeService = qrCodeService;
         }
 
         // GET: api/Shipment
@@ -58,9 +45,12 @@ namespace WebApplication1.Controllers
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<Shipment>>> GetShipmentsByUser(int userId)
         {
-            return await _context.Shipments
+            var shipments = await _context.Shipments
                 .Where(s => s.UserId == userId)
                 .ToListAsync();
+                
+            Console.WriteLine($"Found {shipments.Count} shipments for user {userId}");
+            return shipments;
         }
 
         // GET: api/Shipment/tracking/{trackingId}
@@ -73,6 +63,8 @@ namespace WebApplication1.Controllers
                 return BadRequest("Tracking ID cannot be empty.");
             }
 
+            Console.WriteLine($"Looking up shipment with tracking ID: {trackingId}");
+
             // Find shipment by tracking ID
             var shipment = await _context.Shipments
                 .FirstOrDefaultAsync(s => s.TrackingId == trackingId);
@@ -80,9 +72,11 @@ namespace WebApplication1.Controllers
             // Return 404 if not found
             if (shipment == null)
             {
+                Console.WriteLine($"No shipment found with tracking ID: {trackingId}");
                 return NotFound($"No shipment found with tracking ID: {trackingId}");
             }
 
+            Console.WriteLine($"Found shipment {shipment.Id} with tracking ID: {trackingId}");
             return shipment;
         }
 
@@ -98,12 +92,11 @@ namespace WebApplication1.Controllers
             }
 
             // Generate tracking ID
-            shipment.TrackingId = _trackingService.GenerateTrackingId();
+            shipment.TrackingId = GenerateTrackingId();
 
-            // Generate QR code containing tracking URL
-            
-            string trackingUrl = $"http://https://smart-trackingg.vercel.app/track/{shipment.TrackingId}";
-            shipment.QRCodeImage = _qrCodeService.GenerateQRCode(trackingUrl);
+            // Generate a placeholder for QR code (we removed the service)
+            string trackingUrl = $"https://smart-trackingg.vercel.app/track/{shipment.TrackingId}";
+            shipment.QRCodeImage = ""; // Placeholder since we removed the QR service
 
             // Set user email from the user
             shipment.UserEmail = user.Email;
@@ -114,57 +107,22 @@ namespace WebApplication1.Controllers
             _context.Shipments.Add(shipment);
             await _context.SaveChangesAsync();
 
-            // Try to send email notification - don't fail if email service is down
-            try
-            {
-                Console.WriteLine($"Attempting to send shipment confirmation email to: {user.Email}");
-                string emailBody = $@"
-                    <html>
-                    <body>
-                        <h2>Your Parcel Has Been Registered</h2>
-                        <p>Dear {user.FirstName},</p>
-                        <p>Your parcel has been successfully registered in our system.</p>
-                        <p><strong>Tracking ID:</strong> {shipment.TrackingId}</p>
-                        <p><strong>Recipient:</strong> {shipment.RecipientName}</p>
-                        <p><strong>Delivery Address:</strong> {shipment.DeliveryAddress}</p>
-                        <p>You can track your parcel status using the tracking ID above.</p>
-                        <p>Thank you for using our service!</p>
-                    </body>
-                    </html>";
-
-                await _emailService.SendEmailAsync(user.Email, "Parcel Registration Confirmation", emailBody);
-                Console.WriteLine("Shipment confirmation email sent successfully");
-            }
-            catch (Exception ex)
-            {
-                // Log the email error but don't fail the shipment creation
-                Console.WriteLine($"Email notification failed for shipment {shipment.TrackingId}: {ex.Message}");
-                Console.WriteLine($"Email error details: {ex}");
-            }
-
-            // Try to send SMS notification if phone number exists - don't fail if SMS service is down
-            try
-            {
-                if (!string.IsNullOrEmpty(user.PhoneNumber))
-                {
-                    Console.WriteLine($"Attempting to send shipment SMS to: {user.PhoneNumber}");
-                    string smsMessage = $"Your parcel has been registered. Tracking ID: {shipment.TrackingId}";
-                    await _smsService.SendSmsAsync(user.PhoneNumber, smsMessage);
-                    Console.WriteLine("Shipment SMS sent successfully");
-                }
-                else
-                {
-                    Console.WriteLine("No phone number found for user, skipping shipment SMS");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log the SMS error but don't fail the shipment creation
-                Console.WriteLine($"SMS notification failed for shipment {shipment.TrackingId}: {ex.Message}");
-                Console.WriteLine($"SMS error details: {ex}");
-            }
-
+            Console.WriteLine($"Created new shipment with ID: {shipment.Id}, tracking ID: {shipment.TrackingId}");
             return CreatedAtAction(nameof(GetShipment), new { id = shipment.Id }, shipment);
+        }
+
+        // Helper method to generate tracking ID
+        private string GenerateTrackingId()
+        {
+            // Simple tracking ID format: PT-XXXX-XXXXXX
+            var random = new Random();
+            string prefix = "PT";
+            string middle = random.Next(1000, 9999).ToString();
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string suffix = new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+            
+            return $"{prefix}-{middle}-{suffix}";
         }
 
         // PUT: api/Shipment/5
@@ -257,7 +215,7 @@ namespace WebApplication1.Controllers
             // Generate OTP
             var otp = new DeliveryOtp
             {
-                Otp = _trackingService.GenerateOtp(),
+                Otp = GenerateRandomOtp(),
                 ShipmentId = shipmentId
             };
 

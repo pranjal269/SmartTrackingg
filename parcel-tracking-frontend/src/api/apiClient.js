@@ -16,28 +16,41 @@ const getApiBaseUrl = () => {
 };
 
 const apiClient = axios.create({
-  headers: { 'Content-Type': 'application/json' }
+  baseURL: getApiBaseUrl(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
 });
 
-// Set the base URL dynamically for each request
-apiClient.interceptors.request.use(config => {
-  // Set baseURL for each request
-  config.baseURL = getApiBaseUrl();
-  
-  console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
-  
-  return config;
-});
+// Add request interceptor for debugging
+apiClient.interceptors.request.use(
+  (config) => {
+    console.log('API Request:', config.method.toUpperCase(), config.url);
+    if (config.data) {
+      console.log('Request Data:', config.data);
+    }
+    return config;
+  },
+  (error) => {
+    console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
 
-// Add response interceptor to log responses
+// Add response interceptor for debugging
 apiClient.interceptors.response.use(
-  response => {
-    console.log('API Response:', response.status, response.data);
+  (response) => {
+    console.log('API Response:', response.status, response.config.url);
+    console.log('Response Data:', response.data);
     return response;
   },
-  error => {
-    console.error('API Error:', error.response?.status, error.response?.data || error.message);
-    console.error('Request URL:', error.config?.baseURL + error.config?.url);
+  (error) => {
+    console.error('Response Error:', error);
+    if (error.response) {
+      console.error('Error Status:', error.response.status);
+      console.error('Error Data:', error.response.data);
+    }
     return Promise.reject(error);
   }
 );

@@ -7,22 +7,72 @@ const Dashboard = () => {
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retries, setRetries] = useState(0);
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
   const userName = localStorage.getItem('userName');
 
   useEffect(() => {
+    // Validate user is logged in
+    if (!userId) {
+      console.error('No userId found in localStorage, redirecting to login');
+      navigate('/login');
+      return;
+    }
+    
+    console.log('Dashboard mounted, userId:', userId, 'userName:', userName);
     fetchShipments();
-  }, []);
+  }, [userId, navigate]);
 
   const fetchShipments = async () => {
+    if (!userId) {
+      console.error('Cannot fetch shipments: No userId available');
+      setError('You need to be logged in to view shipments');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log(`Fetching shipments for user ID: ${userId}`);
       const response = await apiClient.get(`/shipment/user/${userId}`);
+      console.log('Shipments response:', response.data);
       setShipments(response.data);
+      setError('');
     } catch (err) {
-      setError('Failed to fetch shipments');
       console.error('Error fetching shipments:', err);
+      console.error('Request URL:', err.config?.baseURL + err.config?.url);
+      console.error('Response:', err.response?.data);
+      
+      // Handle unauthorized errors by redirecting to login
+      if (err.response?.status === 401) {
+        console.log('Unauthorized access, redirecting to login');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userRole');
+        navigate('/login');
+        return;
+      }
+      
+      // If we get a network error or 5xx error, retry up to 3 times
+      if (!err.response || err.response.status >= 500) {
+        if (retries < 3) {
+          const nextRetry = retries + 1;
+          setRetries(nextRetry);
+          console.log(`Retrying shipment fetch (${nextRetry}/3) in 2 seconds...`);
+          
+          setTimeout(() => {
+            fetchShipments();
+          }, 2000);
+          
+          setError(`Connection issue. Retrying... (${nextRetry}/3)`);
+        } else {
+          setError('Failed to fetch shipments after multiple attempts. Please refresh the page or try again later.');
+        }
+      } else {
+        setError('Failed to fetch shipments. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
@@ -54,6 +104,9 @@ const Dashboard = () => {
         <div className="loading-container">
           <div className="modern-spinner"></div>
           <p>Loading your shipments...</p>
+          {retries > 0 && (
+            <p className="retry-message">Connection attempt {retries}/3</p>
+          )}
         </div>
       </div>
     );
@@ -99,6 +152,17 @@ const Dashboard = () => {
         <div className="modern-error">
           <span>⚠️</span>
           {error}
+          {retries > 0 && (
+            <button 
+              onClick={() => {
+                setRetries(0);
+                fetchShipments();
+              }}
+              className="retry-btn"
+            >
+              Retry Now
+            </button>
+          )}
         </div>
       )}
 
