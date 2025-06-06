@@ -33,17 +33,21 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await apiClient.post('/login', formData);
-      const { user } = response.data; // Extract user from the response
+      console.log('Attempting login with:', formData);
+      const response = await apiClient.post('/user/login', formData);
+      console.log('Login response:', response.data);
+      
+      const user = response.data; // The API returns the user directly
 
       // Store user data in localStorage
       localStorage.setItem('userId', user.id.toString());
       localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userName', `${user.firstName} ${user.lastName}`);
+      localStorage.setItem('userName', user.name);
 
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+      setError(err.response?.data || 'Login failed. Please check your credentials and try again.');
     } finally {
       setLoading(false);
     }

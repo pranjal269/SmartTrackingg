@@ -8,6 +8,7 @@ const Register = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: ''
   });
@@ -42,6 +43,12 @@ const Register = () => {
 
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    // Phone number validation - should only contain digits
+    if (formData.phoneNumber && !/^\d+$/.test(formData.phoneNumber)) {
+      setError('Phone number should only contain digits, no spaces or special characters');
       return;
     }
 
@@ -113,6 +120,21 @@ const Register = () => {
               required
               placeholder="Enter your email"
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phoneNumber">Phone Number</label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              placeholder="Enter your phone number (e.g., 8233030911)"
+            />
+            <small style={{ color: '#666', fontSize: '0.8rem' }}>
+              Recommended: Add phone number to receive OTP via SMS
+            </small>
           </div>
 
           <div className="form-group">

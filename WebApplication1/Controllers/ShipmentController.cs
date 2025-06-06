@@ -102,7 +102,7 @@ namespace WebApplication1.Controllers
 
             // Generate QR code containing tracking URL
             
-            string trackingUrl = $"http://192.168.1.6:3000/track/{shipment.TrackingId}";
+            string trackingUrl = $"http://https://smart-trackingg.vercel.app/track/{shipment.TrackingId}";
             shipment.QRCodeImage = _qrCodeService.GenerateQRCode(trackingUrl);
 
             // Set user email from the user
@@ -272,15 +272,26 @@ namespace WebApplication1.Controllers
                 Console.WriteLine($"Attempting to send email to: {shipment.UserEmail}");
                 string emailBody = $@"
                     <html>
-                    <body>
-                        <h2>Your OTP for Delivery</h2>
-                        <p>Dear {shipment.RecipientName},</p>
-                        <p>Your OTP for delivery is: <strong>{otp.Otp}</strong></p>
-                        <p>Please use this OTP to confirm the delivery of your parcel.</p>
+                    <body style='font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;'>
+                        <div style='background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b); padding: 20px; border-radius: 10px; text-align: center; color: white;'>
+                            <h1 style='margin: 0;'>SmartTracking</h1>
+                        </div>
+                        <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;'>
+                            <h2 style='color: #333;'>Your Delivery OTP Code</h2>
+                            <p style='font-size: 16px; color: #555;'>Hello {shipment.RecipientName},</p>
+                            <p style='font-size: 16px; color: #555;'>Use the following OTP code to confirm the delivery of your parcel (Tracking ID: {shipment.TrackingId}):</p>
+                            <div style='font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 30px 0; color: #333; background: #e9ecef; padding: 15px; border-radius: 5px;'>
+                                {otp.Otp}
+                            </div>
+                            <p style='font-size: 14px; color: #777;'>This OTP is valid for a limited time. Do not share this code with anyone.</p>
+                        </div>
+                        <div style='text-align: center; margin-top: 20px; color: #777; font-size: 14px;'>
+                            <p>© {DateTime.Now.Year} SmartTracking. All rights reserved.</p>
+                        </div>
                     </body>
                     </html>";
 
-                await _emailService.SendEmailAsync(shipment.UserEmail, "Delivery OTP", emailBody);
+                await _emailService.SendEmailAsync(shipment.UserEmail, "SmartTracking - Delivery OTP", emailBody);
                 Console.WriteLine("Email sent successfully");
             }
             catch (Exception ex)
@@ -296,7 +307,7 @@ namespace WebApplication1.Controllers
                 if (!string.IsNullOrEmpty(user.PhoneNumber))
                 {
                     Console.WriteLine($"Attempting to send SMS to: {user.PhoneNumber}");
-                    string smsMessage = $"Your delivery OTP for parcel {shipment.TrackingId} is: {otp.Otp}. Use this to confirm delivery.";
+                    string smsMessage = $"SmartTracking: Your delivery OTP for parcel {shipment.TrackingId} is: {otp.Otp}. This code is valid for a limited time. Do not share it with anyone.";
                     await _smsService.SendSmsAsync(user.PhoneNumber, smsMessage);
                     Console.WriteLine("SMS sent successfully");
                 }

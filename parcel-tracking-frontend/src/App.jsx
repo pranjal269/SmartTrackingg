@@ -57,32 +57,60 @@ const Navigation = () => {
   }
 
   return (
-    <nav className="navbar">
+    <nav className="modern-navbar">
       <div className="container">
-        <h1>Parcel Tracker</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <nav>
-            <Link to="/track-shipment">Track Shipment</Link>
+        <div className="navbar-brand">
+          <div className="logo-icon">📦</div>
+          <h1>SmartTracking</h1>
+        </div>
+        <div className="navbar-menu">
+          <div className="nav-links">
+            <Link to="/track-shipment" className="nav-link">
+              <span className="nav-icon">🔍</span>
+              Track Shipment
+            </Link>
             {userId && (
               <>
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/create-shipment">Create Shipment</Link>
+                <Link to="/dashboard" className="nav-link">
+                  <span className="nav-icon">📊</span>
+                  Dashboard
+                </Link>
+                <Link to="/create-shipment" className="nav-link">
+                  <span className="nav-icon">➕</span>
+                  Create Shipment
+                </Link>
               </>
             )}
             {!userId && (
               <>
-                <Link to="/login">Login</Link>
-                <Link to="/register">Register</Link>
-                <div style={{ margin: '0 10px', color: '#7f8c8d' }}>|</div>
-                <Link to="/handler-login">Handler Login</Link>
-                <Link to="/admin-login">Admin Login</Link>
+                <Link to="/login" className="nav-link">
+                  <span className="nav-icon">🔑</span>
+                  Login
+                </Link>
+                <Link to="/register" className="nav-link">
+                  <span className="nav-icon">📝</span>
+                  Register
+                </Link>
+                <div className="divider"></div>
+                <Link to="/handler-login" className="nav-link">
+                  <span className="nav-icon">👷</span>
+                  Handler
+                </Link>
+                <Link to="/admin-login" className="nav-link">
+                  <span className="nav-icon">👨‍💼</span>
+                  Admin
+                </Link>
               </>
             )}
-          </nav>
+          </div>
           {userId && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span>Welcome, {userName}!</span>
+            <div className="user-menu">
+              <div className="user-info">
+                <span className="user-icon">👤</span>
+                <span className="user-name">{userName}</span>
+              </div>
               <button className="logout-btn" onClick={handleLogout}>
+                <span className="logout-icon">🚪</span>
                 Logout
               </button>
             </div>

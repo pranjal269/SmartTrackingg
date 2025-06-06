@@ -1,19 +1,18 @@
 import axios from 'axios';
 
-// Dynamically determine the API base URL based on current host
+// Configure your ngrok URL here (replace with your actual ngrok URL)
+const NGROK_URL = 'https://f63e-103-180-214-187.ngrok-free.app/api'; // Make sure to include /api path
+const AZURE_URL = 'https://smart-tracking-backend.azurewebsites.net/api';
+
+// Use ngrok for development and Azure as fallback
 const getApiBaseUrl = () => {
-  // Check if we're in a browser environment
-  if (typeof window !== 'undefined' && window.location) {
-    const currentHost = window.location.hostname;
-    
-    // If accessing via network IP, use the same IP for API
-    if (currentHost === '192.168.1.6') {
-      return 'http://192.168.1.6:8080/api';
-    }
+  // For local development or testing with ngrok
+  if (NGROK_URL && NGROK_URL !== 'YOUR_NGROK_URL') {
+    return NGROK_URL;
   }
   
-  // Default to localhost for local development
-  return 'http://localhost:8080/api';
+  // Fallback to Azure for production
+  return AZURE_URL;
 };
 
 const apiClient = axios.create({
@@ -22,7 +21,7 @@ const apiClient = axios.create({
 
 // Set the base URL dynamically for each request
 apiClient.interceptors.request.use(config => {
-  // Set baseURL for each request to handle dynamic detection
+  // Set baseURL for each request
   config.baseURL = getApiBaseUrl();
   
   console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url);

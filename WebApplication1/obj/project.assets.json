@@ -6591,25 +6591,24 @@
     ]
   },
   "packageFolders": {
-    "/Users/dev16/.nuget/packages/": {}
+    "/Users/pranjalagarwal/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/dev16/temp_project/WebApplication1.csproj",
+      "projectUniqueName": "/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/WebApplication1.csproj",
       "projectName": "WebApplication1",
-      "projectPath": "/Users/dev16/temp_project/WebApplication1.csproj",
-      "packagesPath": "/Users/dev16/.nuget/packages/",
-      "outputPath": "/Users/dev16/temp_project/obj/",
+      "projectPath": "/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/WebApplication1.csproj",
+      "packagesPath": "/Users/pranjalagarwal/.nuget/packages/",
+      "outputPath": "/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/dev16/.nuget/NuGet/NuGet.Config"
+        "/Users/pranjalagarwal/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "/opt/homebrew/Cellar/dotnet/9.0.5/libexec/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -6628,7 +6627,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -6694,20 +6693,6 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.16, 8.0.16]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Host.osx-arm64",
-            "version": "[8.0.16, 8.0.16]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[8.0.16, 8.0.16]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.AspNetCore.App": {
             "privateAssets": "none"
@@ -6716,7 +6701,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet/9.0.5/libexec/sdk/9.0.106/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

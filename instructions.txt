@@ -1,0 +1,378 @@
+# 🚀 SmartTracking Complete Deployment Guide
+
+This guide will help you set up the entire SmartTracking system on a new computer with PostgreSQL database, Docker backend, and React frontend.
+
+## 📋 Prerequisites Installation
+
+### 1. Install Required Software
+
+#### On Windows:
+```bash
+# Install Docker Desktop
+# Download from: https://www.docker.com/products/docker-desktop
+
+# Install Node.js (v18 or higher)
+# Download from: https://nodejs.org/
+
+# Install PostgreSQL
+# Download from: https://www.postgresql.org/download/windows/
+
+# Install Git
+# Download from: https://git-scm.com/download/win
+```
+
+#### On macOS:
+```bash
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Docker Desktop
+brew install --cask docker
+
+# Install Node.js
+brew install node
+
+# Install PostgreSQL
+brew install postgresql@14
+brew services start postgresql@14
+
+# Install Git
+brew install git
+```
+
+#### On Linux (Ubuntu/Debian):
+```bash
+# Update package list
+sudo apt update
+
+# Install Docker
+sudo apt install docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install PostgreSQL
+sudo apt install postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# Install Git
+sudo apt install git
+```
+
+## 🗄️ Database Setup
+
+### 1. PostgreSQL Configuration
+
+#### Create Database and User:
+```bash
+# Connect to PostgreSQL (Windows/Linux)
+sudo -u postgres psql
+
+# On macOS
+psql postgres
+
+# Inside PostgreSQL shell, run these commands:
+CREATE DATABASE parcel_tracker;
+CREATE USER dev16 WITH ENCRYPTED PASSWORD 'Datta@123';
+GRANT ALL PRIVILEGES ON DATABASE parcel_tracker TO dev16;
+ALTER USER dev16 CREATEDB;
+\q
+```
+
+#### Test Database Connection:
+```bash
+# Test connection
+psql -h localhost -U dev16 -d parcel_tracker
+# Enter password: Datta@123
+# If successful, you'll see parcel_tracker=# prompt
+\q
+```
+
+## 📦 Project Setup
+
+### 1. Clone Repository
+```bash
+# Clone the repository
+git clone https://github.com/pranjal269/SmartTrackingg.git
+cd SmartTrackingg
+```
+
+### 2. Backend Configuration
+
+#### Update Database Connection:
+```bash
+# Navigate to backend directory
+cd WebApplication1
+
+# Edit appsettings.json (update connection string if needed)
+nano appsettings.json  # or use any text editor
+```
+
+**Ensure appsettings.json has correct connection:**
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=host.docker.internal;Port=5432;Database=parcel_tracker;Username=dev16;Password=Datta@123;Pooling=true;Include Error Detail=true;"
+  },
+  "EmailSettings": {
+    "SmtpServer": "smtp.sendgrid.net",
+    "SmtpPort": 587,
+    "SmtpUsername": "apikey",
+    "SmtpPassword": "YOUR_SENDGRID_API_KEY",
+    "SenderName": "SmartTracking",
+    "SenderEmail": "your-verified-email@domain.com"
+  },
+  "SmsSettings": {
+    "AccountSid": "YOUR_TWILIO_ACCOUNT_SID",
+    "AuthToken": "YOUR_TWILIO_AUTH_TOKEN",
+    "TwilioPhoneNumber": "YOUR_TWILIO_PHONE_NUMBER"
+  }
+}
+```
+
+### 3. Build and Run Backend with Docker
+
+#### Build Docker Image:
+```bash
+# From the SmartTrackingg root directory
+docker build -t smarttracking-backend .
+```
+
+#### Run Docker Container:
+```bash
+# Run the container with network access to host database
+docker run -d \
+  --name smarttracking-backend \
+  -p 8080:80 \
+  --add-host=host.docker.internal:host-gateway \
+  -e ASPNETCORE_ENVIRONMENT=Development \
+  -e ASPNETCORE_URLS="http://+:80" \
+  smarttracking-backend
+```
+
+#### Verify Backend is Running:
+```bash
+# Check container status
+docker ps
+
+# Check logs
+docker logs smarttracking-backend
+
+# Test API (should return Swagger page)
+curl http://localhost:8080/swagger/index.html
+```
+
+### 4. Apply Database Migrations
+
+#### Option A: Using Docker Exec
+```bash
+# Execute migrations inside the container
+docker exec -it smarttracking-backend dotnet ef database update
+```
+
+#### Option B: Run Migrations Locally (if .NET 8 SDK installed)
+```bash
+# Install .NET 8 SDK first, then:
+cd WebApplication1
+dotnet ef database update
+```
+
+### 5. Frontend Setup
+
+#### Install Dependencies:
+```bash
+# Navigate to frontend directory
+cd parcel-tracking-frontend
+
+# Install npm packages
+npm install
+```
+
+#### Configure API Base URL:
+```bash
+# Check src/api/apiClient.js and ensure it points to correct backend
+nano src/api/apiClient.js
+```
+
+**Ensure apiClient.js has dynamic URL detection:**
+```javascript
+import axios from 'axios';
+
+// Dynamic API base URL detection
+const getApiBaseUrl = () => {
+  const currentHost = window.location.hostname;
+  
+  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+    return 'http://localhost:8080/api';
+  } else {
+    return `http://${currentHost}:8080/api`;
+  }
+};
+
+const apiClient = axios.create({
+  baseURL: getApiBaseUrl(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export default apiClient;
+```
+
+#### Start Frontend Development Server:
+```bash
+# Start React development server
+npm start
+```
+
+The frontend will be available at `http://localhost:3000`
+
+## 🌐 Network Access Setup (Optional)
+
+### For Access from Other Devices on Network:
+
+#### Update Frontend for Network Access:
+```bash
+# Create .env file in parcel-tracking-frontend directory
+echo "HOST=0.0.0.0" > .env
+echo "PORT=3000" >> .env
+
+# Start with network access
+npm start
+```
+
+#### Update Backend CORS (if needed):
+Edit `WebApplication1/Program.cs` to include your network IP in CORS policy.
+
+## 🧪 Testing the Complete Setup
+
+### 1. Verify All Services:
+```bash
+# Check PostgreSQL
+psql -h localhost -U dev16 -d parcel_tracker -c "SELECT version();"
+
+# Check Backend API
+curl http://localhost:8080/api/user -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"firstName":"Test","lastName":"User","email":"test@example.com","password":"password123"}'
+
+# Check Frontend
+open http://localhost:3000  # macOS
+# or
+start http://localhost:3000  # Windows
+# or
+xdg-open http://localhost:3000  # Linux
+```
+
+### 2. Test Complete Workflow:
+1. **Registration**: Go to `http://localhost:3000` → Register new user
+2. **Login**: Login with registered credentials
+3. **Create Shipment**: Create a test shipment
+4. **Track Shipment**: Use tracking ID to track the shipment
+5. **Admin Access**: Login as admin (`admin@parcel.com` / `admin123`)
+6. **Handler Access**: Login as handler (`handler@parcel.com` / `handler123`)
+
+## 🔧 Troubleshooting
+
+### Common Issues and Solutions:
+
+#### Database Connection Issues:
+```bash
+# Check PostgreSQL is running
+sudo systemctl status postgresql  # Linux
+brew services list | grep postgresql  # macOS
+
+# Check if port 5432 is open
+telnet localhost 5432
+
+# Reset PostgreSQL password if needed
+sudo -u postgres psql
+ALTER USER dev16 WITH PASSWORD 'Datta@123';
+```
+
+#### Docker Issues:
+```bash
+# Restart Docker service
+sudo systemctl restart docker  # Linux
+# Restart Docker Desktop on Windows/macOS
+
+# Check Docker logs
+docker logs smarttracking-backend
+
+# Rebuild container if needed
+docker stop smarttracking-backend
+docker rm smarttracking-backend
+docker build -t smarttracking-backend .
+docker run -d --name smarttracking-backend -p 8080:80 smarttracking-backend
+```
+
+#### Frontend Issues:
+```bash
+# Clear npm cache
+npm cache clean --force
+
+# Delete node_modules and reinstall
+rm -rf node_modules package-lock.json
+npm install
+
+# Check for port conflicts
+lsof -i :3000  # macOS/Linux
+netstat -ano | findstr :3000  # Windows
+```
+
+#### CORS Issues:
+```bash
+# Check browser console for CORS errors
+# Ensure backend Program.cs includes frontend URL in CORS policy
+# Restart backend container after CORS changes
+```
+
+## 🚀 Production Deployment (Optional)
+
+### For Production Environment:
+
+#### Backend Production:
+```bash
+# Build production Docker image
+docker build -t smarttracking-backend:prod --build-arg ASPNETCORE_ENVIRONMENT=Production .
+
+# Run with production environment
+docker run -d \
+  --name smarttracking-prod \
+  -p 80:80 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  smarttracking-backend:prod
+```
+
+#### Frontend Production:
+```bash
+# Build production frontend
+npm run build
+
+# Serve with a web server (nginx, apache, etc.)
+# Or use a simple HTTP server
+npx serve -s build -l 3000
+```
+
+## 📞 Support
+
+If you encounter issues:
+1. Check the logs: `docker logs smarttracking-backend`
+2. Verify database connectivity
+3. Ensure all ports are available (3000, 5432, 8080)
+4. Check firewall settings
+5. Refer to the main README.md for additional information
+
+---
+
+**System is now ready! 🎉**
+
+Access your SmartTracking system at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **API Documentation**: http://localhost:8080/swagger/index.html

@@ -30,12 +30,21 @@ const Dashboard = () => {
 
   const handleDeliverOtp = async (shipmentId) => {
     try {
-      await apiClient.post(`/shipment/otp/${shipmentId}`);
-      alert('OTP sent to your email!');
+      setLoading(true);
+      console.log(`Generating OTP for shipment ID: ${shipmentId}`);
+      const response = await apiClient.post(`/shipment/otp/${shipmentId}`);
+      console.log('OTP generation response:', response.data);
+      
+      alert('OTP has been sent to your email and phone (if provided)!');
       navigate(`/otp-verification/${shipmentId}`);
     } catch (err) {
-      setError('Failed to generate delivery OTP');
       console.error('Error generating OTP:', err);
+      setError(`Failed to generate delivery OTP: ${err.response?.data || err.message}`);
+      setTimeout(() => {
+        setError(''); // Clear error after 5 seconds
+      }, 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -191,33 +200,6 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <h3>Quick Actions</h3>
-        <div className="actions-grid">
-          <button 
-            onClick={() => navigate('/create-shipment')}
-            className="action-card"
-          >
-            <div className="action-icon">📦</div>
-            <div className="action-text">
-              <h4>Create Shipment</h4>
-              <p>Send a new package</p>
-            </div>
-          </button>
-          <button 
-            onClick={() => navigate('/track-shipment')}
-            className="action-card"
-          >
-            <div className="action-icon">🔍</div>
-            <div className="action-text">
-              <h4>Track Shipment</h4>
-              <p>Find any package</p>
-            </div>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

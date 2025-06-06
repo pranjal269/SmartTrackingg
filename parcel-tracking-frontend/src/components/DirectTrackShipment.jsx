@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiClient from '../api/apiClient';
+import './Dashboard.css';
 
 const DirectTrackShipment = () => {
   const { trackingId } = useParams();
@@ -35,11 +36,21 @@ const DirectTrackShipment = () => {
 
   if (loading) {
     return (
-      <div>
-        <h2>Loading Shipment Details...</h2>
-        <div className="loading">
-          <div className="spinner"></div>
-          <p>Fetching shipment information for: {trackingId}</p>
+      <div className="modern-dashboard">
+        <div className="dashboard-hero">
+          <div className="hero-content">
+            <h1>🔍 Tracking Shipment</h1>
+            <p>Loading details for {trackingId}</p>
+          </div>
+        </div>
+        <div className="tracking-loading">
+          <div className="loading-animation">
+            <div className="package-icon">📦</div>
+            <div className="loading-text">
+              <h3>Loading shipment details...</h3>
+              <p>Please wait while we retrieve your package information</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -47,181 +58,192 @@ const DirectTrackShipment = () => {
 
   if (error) {
     return (
-      <div>
-        <h2>Tracking Error</h2>
-        <div className="error">{error}</div>
-        <div className="card" style={{ marginTop: '2rem' }}>
-          <h3>Having trouble?</h3>
-          <p>The tracking ID "{trackingId}" could not be found in our system.</p>
-          <Link to="/track-shipment" className="btn-secondary">
-            Try Manual Tracking
-          </Link>
+      <div className="modern-dashboard">
+        <div className="dashboard-hero gradient-hero">
+          <div className="hero-content">
+            <h1>❌ Tracking Error</h1>
+            <p>There was a problem finding your shipment</p>
+          </div>
+        </div>
+        <div className="modern-error">
+          <span>⚠️</span>
+          {error}
+        </div>
+        <div className="help-section">
+          <div className="help-card">
+            <h3>💡 Need Help?</h3>
+            <div className="help-tips">
+              <div className="tip">
+                <span className="tip-icon">✓</span>
+                <span>Make sure you've entered the correct tracking ID</span>
+              </div>
+              <div className="tip">
+                <span className="tip-icon">✓</span>
+                <span>Tracking IDs are usually in the format PT-XXXX-XXXXXX</span>
+              </div>
+              <div className="tip">
+                <span className="tip-icon">✓</span>
+                <span>Try again or contact customer support if you continue to have issues</span>
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+              <Link to="/track-shipment" className="modern-btn primary">
+                Try Manual Tracking
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2>Shipment Details</h2>
-      <p style={{ marginBottom: '2rem', color: '#666' }}>
-        Showing details for tracking ID: <strong>{trackingId}</strong>
-      </p>
+    <div className="modern-dashboard">
+      <div className="dashboard-hero gradient-hero">
+        <div className="hero-content">
+          <h1>📦 Shipment Details</h1>
+          <p>Showing details for tracking ID: <strong>{trackingId}</strong></p>
+        </div>
+        <Link to="/track-shipment" className="modern-btn secondary">
+          Track Another Shipment
+        </Link>
+      </div>
 
       {shipment && (
-        <div className="tracking-result">
-          <div className="card">
-            <h3>📦 Shipment Information</h3>
-            <div className="details">
-              <p><strong>Tracking ID:</strong> {shipment.trackingId}</p>
-              <p><strong>Recipient:</strong> {shipment.recipientName}</p>
-              <p><strong>Delivery Address:</strong> {shipment.deliveryAddress}</p>
-              <p><strong>Package Type:</strong> {shipment.packageType || 'Standard'}</p>
-              <p><strong>Weight:</strong> {shipment.weight} kg</p>
-              {shipment.specialInstructions && (
-                <p><strong>Special Instructions:</strong> {shipment.specialInstructions}</p>
-              )}
-              <p><strong>Status:</strong> 
-                <span 
-                  style={{
-                    marginLeft: '0.5rem',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '20px',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    backgroundColor: shipment.status === 'Delivered' ? '#28a745' : 
-                                   shipment.status === 'Pending' ? '#ffc107' : '#007bff',
-                    color: 'white'
-                  }}
-                >
-                  {shipment.status}
-                </span>
-              </p>
-              <p><strong>Created:</strong> {new Date(shipment.createdAt).toLocaleString()}</p>
-              {shipment.currentAddress && (
-                <p><strong>Current Location:</strong> {shipment.currentAddress}</p>
-              )}
+        <div className="tracking-results">
+          {/* Status Card */}
+          <div className="status-card">
+            <div className={`status-indicator ${shipment.status.toLowerCase().replace(' ', '-')}`}>
+              <div className="status-icon">
+                {shipment.status === 'Delivered' ? '🎯' : shipment.status === 'In Transit' ? '🚚' : '📦'}
+              </div>
+              <div className="status-text">
+                <h4>{shipment.status}</h4>
+                <p>
+                  {shipment.status === 'Delivered' 
+                    ? 'Your package has been successfully delivered to the recipient.'
+                    : shipment.status === 'In Transit'
+                    ? 'Your package is on its way to the destination.'
+                    : 'Your package is being processed.'}
+                </p>
+              </div>
             </div>
-
-            {shipment.status === 'Delivered' ? (
-              <div 
-                style={{
-                  backgroundColor: '#d4edda',
-                  color: '#155724',
-                  padding: '1.5rem',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  marginTop: '1.5rem',
-                  border: '2px solid #c3e6cb'
-                }}
-              >
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>
-                  ✅ Shipment Successfully Delivered!
-                </h4>
-                <p style={{ margin: '0', fontSize: '0.875rem' }}>
-                  Your package has been successfully delivered to the recipient.
-                </p>
-              </div>
-            ) : (
-              <div 
-                style={{
-                  backgroundColor: '#e3f2fd',
-                  color: '#1565c0',
-                  padding: '1.5rem',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  marginTop: '1.5rem',
-                  border: '2px solid #bbdefb'
-                }}
-              >
-                <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>
-                  🚚 Shipment In Transit
-                </h4>
-                <p style={{ margin: '0', fontSize: '0.875rem' }}>
-                  Your shipment is currently being processed and will be delivered soon.
-                </p>
-              </div>
-            )}
-
-            {shipment.qrCodeImage && (
-              <div className="qr-code" style={{ marginTop: '2rem' }}>
-                <h4>QR Code</h4>
-                <img 
-                  src={`data:image/png;base64,${shipment.qrCodeImage}`}
-                  alt="Shipment QR Code"
-                  width="200"
-                  height="200"
-                  style={{ 
-                    border: '2px solid #ddd', 
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                  }}
-                />
-                <p style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
-                  Share this QR code for quick access to shipment details
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="card" style={{ marginTop: '2rem' }}>
-            <h3>📋 Tracking Timeline</h3>
-            <div style={{ padding: '1rem 0' }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                marginBottom: '1rem',
-                padding: '0.75rem',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '6px'
-              }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: '#28a745',
-                  borderRadius: '50%',
-                  marginRight: '1rem'
-                }}></div>
-                <div>
-                  <strong>Package Created</strong>
-                  <p style={{ margin: '0', fontSize: '0.875rem', color: '#666' }}>
-                    {new Date(shipment.createdAt).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {shipment.status !== 'Pending' && (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  marginBottom: '1rem',
-                  padding: '0.75rem',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '6px'
-                }}>
-                  <div style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: shipment.status === 'Delivered' ? '#28a745' : '#007bff',
-                    borderRadius: '50%',
-                    marginRight: '1rem'
-                  }}></div>
-                  <div>
-                    <strong>Status: {shipment.status}</strong>
-                    <p style={{ margin: '0', fontSize: '0.875rem', color: '#666' }}>
-                      Current status of your shipment
-                    </p>
+            
+            {/* Timeline */}
+            <div className="timeline-container">
+              <h3>📋 Tracking Progress</h3>
+              <div className="modern-timeline">
+                <div className="timeline-node completed">
+                  <div className="node-icon">📦</div>
+                  <div className="node-content">
+                    <h4>Package Created</h4>
+                    <p>{new Date(shipment.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
-              )}
+                
+                <div className={`timeline-connector ${shipment.status !== 'Pending' ? 'active' : ''}`}></div>
+                
+                <div className={`timeline-node ${shipment.status !== 'Pending' ? 'completed' : 'pending'}`}>
+                  <div className="node-icon">🚚</div>
+                  <div className="node-content">
+                    <h4>In Transit</h4>
+                    <p>{shipment.status !== 'Pending' ? 'Package is on its way' : 'Waiting to be dispatched'}</p>
+                  </div>
+                </div>
+                
+                <div className={`timeline-connector ${shipment.status === 'Delivered' ? 'active' : ''}`}></div>
+                
+                <div className={`timeline-node ${shipment.status === 'Delivered' ? 'completed' : 'pending'}`}>
+                  <div className="node-icon">🎯</div>
+                  <div className="node-content">
+                    <h4>Delivered</h4>
+                    <p>{shipment.status === 'Delivered' ? 'Package delivered successfully' : 'Waiting for delivery'}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <Link to="/track-shipment" className="btn-secondary">
-              Track Another Shipment
-            </Link>
+          
+          {/* Details and QR */}
+          <div className="details-qr-container">
+            {/* Shipment Details */}
+            <div className="detail-card">
+              <h3>📋 Shipment Information</h3>
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <span className="detail-label">🏷️ Tracking ID:</span>
+                  <span className="detail-value">{shipment.trackingId}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">👤 Recipient:</span>
+                  <span className="detail-value">{shipment.recipientName}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">📍 Delivery Address:</span>
+                  <span className="detail-value">{shipment.deliveryAddress}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">📦 Package Type:</span>
+                  <span className="detail-value">{shipment.packageType || 'Standard'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">⚖️ Weight:</span>
+                  <span className="detail-value">{shipment.weight} kg</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">📅 Created:</span>
+                  <span className="detail-value">{new Date(shipment.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">📍 Current Location:</span>
+                  <span className="detail-value">{shipment.currentAddress || 'Processing Facility'}</span>
+                </div>
+                {shipment.specialInstructions && (
+                  <div className="detail-item special-instructions">
+                    <span className="detail-label">⚠️ Special Instructions:</span>
+                    <span className="detail-value">{shipment.specialInstructions}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* QR Code */}
+            {shipment.qrCodeImage && (
+              <div className="qr-card">
+                <h3>🔍 Quick Access</h3>
+                <div className="qr-content">
+                  <img 
+                    src={`data:image/png;base64,${shipment.qrCodeImage}`}
+                    alt="Shipment QR Code"
+                    className="qr-image"
+                  />
+                  <div className="qr-info">
+                    <h4>Scan QR Code</h4>
+                    <p>Scan this QR code with your phone camera to quickly access shipment tracking details</p>
+                    <div className="qr-sharing">
+                      <button className="share-btn" onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('Tracking link copied to clipboard!');
+                      }}>
+                        📋 Copy Tracking Link
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+          
+          {/* Delivered Success Message */}
+          {shipment.status === 'Delivered' && (
+            <div className="success-message-card">
+              <div className="success-icon">✅</div>
+              <div className="success-content">
+                <h3>Package Successfully Delivered!</h3>
+                <p>Your package has been delivered to the recipient. Thank you for using our service!</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

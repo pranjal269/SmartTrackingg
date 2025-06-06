@@ -779,179 +779,210 @@
 
 /* QR Section */
 .qr-section {
-  text-align: center;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  margin-top: 15px;
-}
-
-.qr-section h5 {
-  color: #2c3e50;
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.qr-code {
-  width: 80px;
-  height: 80px;
-  cursor: pointer;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
   border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.qr-section h3 {
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+.qr-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-image {
+  width: 200px;
+  height: 200px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+/* QR code image in dashboard parcel list */
+.qr-code {
+  width: 100px;
+  height: 100px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
   transition: transform 0.3s ease;
+  object-fit: contain;
 }
 
 .qr-code:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Card Actions */
-.card-actions {
+.qr-display p {
   text-align: center;
-}
-
-.delivered-badge {
-  color: #27ae60;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 10px;
-  background: #d4edda;
-  border-radius: 8px;
-}
-
-/* Quick Actions */
-.quick-actions {
-  background: white;
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-}
-
-.quick-actions h3 {
-  color: #2c3e50;
-  margin: 0 0 25px 0;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.action-card {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
-  background: #f8f9fa;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.action-card:hover {
-  border-color: #3498db;
-  background: #e3f2fd;
-  transform: translateY(-2px);
-}
-
-.action-icon {
-  font-size: 2rem;
-  min-width: 60px;
-  text-align: center;
-}
-
-.action-text h4 {
-  color: #2c3e50;
-  margin: 0 0 5px 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.action-text p {
-  color: #7f8c8d;
-  margin: 0;
+  color: #666;
   font-size: 0.9rem;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .modern-dashboard {
-    padding: 15px;
-  }
-
-  .dashboard-hero {
-    padding: 25px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .hero-content h1 {
-    font-size: 2rem;
-  }
-
-  .hero-stats {
-    justify-content: center;
-    gap: 20px;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-  }
-
-  .shipments-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .shipment-card {
-    padding: 20px;
-  }
-
-  .info-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-
-  .info-item .value {
-    max-width: 100%;
-    text-align: left;
-  }
-
-  .actions-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .action-card {
-    flex-direction: column;
-    text-align: center;
-    gap: 15px;
-  }
+/* Timeline Styling */
+.tracking-timeline {
+  margin-top: 2rem;
 }
 
-@media (max-width: 480px) {
-  .hero-btn {
-    width: 100%;
-    justify-content: center;
-  }
+.timeline-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .modern-btn {
-    width: 100%;
-    justify-content: center;
-  }
+.timeline {
+  position: relative;
+  padding: 1.5rem 0;
+}
 
-  .hero-stats {
-    width: 100%;
-  }
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 9px;
+  width: 2px;
+  background: #e9ecef;
+  z-index: 0;
+}
 
-  .stat-item {
-    flex: 1;
+.timeline-item {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  z-index: 1;
+}
+
+.timeline-marker.active {
+  background: #007bff;
+  border-color: #0056b3;
+}
+
+.timeline-marker.completed {
+  background: #28a745;
+  border-color: #1e7e34;
+}
+
+.timeline-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #343a40;
+  font-size: 1rem;
+}
+
+.timeline-content p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+/* Success Message */
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 1.5rem;
+  border: 2px solid #c3e6cb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.success-message .success-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.success-message h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.success-message p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Modern Buttons */
+.modern-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.modern-btn.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.modern-btn.primary:hover {
+  background-color: #0056b3;
+}
+
+.modern-btn.secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.modern-btn.secondary:hover {
+  background-color: #545b62;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .qr-image {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 1rem;
   }
 }
 
@@ -1617,5 +1648,268 @@
   .package-icon,
   .no-results-icon {
     font-size: 3rem;
+  }
+}
+
+/* Additional styles for Direct Track Shipment */
+
+/* Gradient Hero Section */
+.gradient-hero {
+  background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+}
+
+/* Details and QR Container */
+.details-qr-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* Status Card */
+.status-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* Detail Card */
+.detail-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.detail-card h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.special-instructions {
+  grid-column: 1 / -1;
+  padding: 0.75rem;
+  background-color: #fff8e6;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+/* QR Card */
+.qr-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.qr-card h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.qr-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qr-image {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+  border: 1px solid #eee;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.qr-info {
+  margin-top: 1rem;
+}
+
+.qr-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.qr-info p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.qr-sharing {
+  margin-top: 1rem;
+}
+
+.share-btn {
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.share-btn:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Modern Timeline */
+.timeline-container {
+  margin-top: 2rem;
+}
+
+.timeline-container h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.modern-timeline {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 0;
+}
+
+.timeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
+  position: relative;
+}
+
+.node-icon {
+  width: 50px;
+  height: 50px;
+  background-color: #f8f9fa;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  border: 2px solid #ddd;
+  margin-bottom: 0.5rem;
+}
+
+.timeline-node.completed .node-icon {
+  background-color: #d4edda;
+  border-color: #28a745;
+}
+
+.timeline-node.pending .node-icon {
+  background-color: #f8f9fa;
+  border-color: #ddd;
+  opacity: 0.7;
+}
+
+.timeline-connector {
+  flex-grow: 1;
+  height: 4px;
+  background-color: #e9ecef;
+  margin-top: 25px;
+  min-width: 50px;
+}
+
+.timeline-connector.active {
+  background-color: #28a745;
+}
+
+.node-content {
+  text-align: center;
+}
+
+.node-content h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.node-content p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.timeline-node.completed .node-content h4 {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.timeline-node.pending .node-content {
+  opacity: 0.7;
+}
+
+/* Success Message Card */
+.success-message-card {
+  display: flex;
+  align-items: center;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.success-message-card .success-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+
+.success-message-card .success-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: #155724;
+}
+
+.success-message-card .success-content p {
+  margin: 0;
+  color: #155724;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .details-qr-container {
+    grid-template-columns: 1fr;
+  }
+
+  .modern-timeline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .timeline-node {
+    width: 100%;
+    flex-direction: row;
+    margin-bottom: 1rem;
+  }
+
+  .node-icon {
+    margin-right: 1rem;
+    margin-bottom: 0;
+  }
+
+  .node-content {
+    text-align: left;
+  }
+
+  .timeline-connector {
+    width: 4px;
+    height: 30px;
+    margin-left: 25px;
+    margin-top: 0;
+    margin-bottom: 1rem;
   }
 } 
