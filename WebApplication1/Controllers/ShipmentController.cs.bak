@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApplication1.Data;
 using WebApplication1.Models;
-using WebApplication1.Services;
-using WebApplication1.Repositories;
 
 namespace WebApplication1.Controllers
 {
@@ -16,43 +14,24 @@ namespace WebApplication1.Controllers
     public class ShipmentController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ITrackingService _trackingService;
-        private readonly IEmailService _emailService;
-        private readonly ISmsService _smsService;
-        private readonly IQRCodeService _qrCodeService;
-        private readonly IShipmentRepository _shipmentRepository;
-        private readonly IDeliveryOtpRepository _otpRepository;
 
-        public ShipmentController(
-            ApplicationDbContext context,
-            ITrackingService trackingService,
-            IEmailService emailService,
-            ISmsService smsService,
-            IQRCodeService qrCodeService,
-            IShipmentRepository shipmentRepository,
-            IDeliveryOtpRepository otpRepository)
+        public ShipmentController(ApplicationDbContext context)
         {
             _context = context;
-            _trackingService = trackingService;
-            _emailService = emailService;
-            _smsService = smsService;
-            _qrCodeService = qrCodeService;
-            _shipmentRepository = shipmentRepository;
-            _otpRepository = otpRepository;
         }
 
         // GET: api/Shipment
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Shipment>>> GetShipments()
         {
-            return await _shipmentRepository.GetAllShipmentsAsync();
+            return await _context.Shipments.ToListAsync();
         }
 
         // GET: api/Shipment/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Shipment>> GetShipment(int id)
         {
-            var shipment = await _shipmentRepository.GetShipmentByIdAsync(id);
+            var shipment = await _context.Shipments.FindAsync(id);
 
             if (shipment == null)
             {
@@ -66,7 +45,9 @@ namespace WebApplication1.Controllers
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<Shipment>>> GetShipmentsByUser(int userId)
         {
-            var shipments = await _shipmentRepository.GetShipmentsByUserIdAsync(userId);
+            var shipments = await _context.Shipments
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
                 
             Console.WriteLine($"Found {shipments.Count} shipments for user {userId}");
             return shipments;
@@ -85,7 +66,8 @@ namespace WebApplication1.Controllers
             Console.WriteLine($"Looking up shipment with tracking ID: {trackingId}");
 
             // Find shipment by tracking ID
-            var shipment = await _shipmentRepository.GetShipmentByTrackingIdAsync(trackingId);
+            var shipment = await _context.Shipments
+                .FirstOrDefaultAsync(s => s.TrackingId == trackingId);
 
             // Return 404 if not found
             if (shipment == null)
@@ -110,11 +92,11 @@ namespace WebApplication1.Controllers
             }
 
             // Generate tracking ID
-            shipment.TrackingId = _trackingService.GenerateTrackingId();
+            shipment.TrackingId = GenerateTrackingId();
 
-            // Generate QR code containing tracking URL
+            // Generate a placeholder for QR code (we removed the service)
             string trackingUrl = $"https://smart-trackingg.vercel.app/track/{shipment.TrackingId}";
-            shipment.QRCodeImage = _qrCodeService.GenerateQRCode(trackingUrl);
+            shipment.QRCodeImage = ""; // Placeholder since we removed the QR service
 
             // Set user email from the user
             shipment.UserEmail = user.Email;
@@ -122,10 +104,25 @@ namespace WebApplication1.Controllers
             // Explicitly detach the User property to avoid validation errors
             shipment.User = null;
             
-            await _shipmentRepository.CreateShipmentAsync(shipment);
+            _context.Shipments.Add(shipment);
+            await _context.SaveChangesAsync();
 
             Console.WriteLine($"Created new shipment with ID: {shipment.Id}, tracking ID: {shipment.TrackingId}");
             return CreatedAtAction(nameof(GetShipment), new { id = shipment.Id }, shipment);
+        }
+
+        // Helper method to generate tracking ID
+        private string GenerateTrackingId()
+        {
+            // Simple tracking ID format: PT-XXXX-XXXXXX
+            var random = new Random();
+            string prefix = "PT";
+            string middle = random.Next(1000, 9999).ToString();
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string suffix = new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+            
+            return $"{prefix}-{middle}-{suffix}";
         }
 
         // PUT: api/Shipment/5
@@ -137,13 +134,15 @@ namespace WebApplication1.Controllers
                 return BadRequest();
             }
 
+            _context.Entry(shipment).State = EntityState.Modified;
+
             try
             {
-                await _shipmentRepository.UpdateShipmentAsync(shipment);
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _shipmentRepository.ShipmentExistsAsync(id))
+                if (!ShipmentExists(id))
                 {
                     return NotFound();
                 }
@@ -160,7 +159,7 @@ namespace WebApplication1.Controllers
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateShipmentStatus(int id, [FromBody] ShipmentStatusUpdate statusUpdate)
         {
-            var shipment = await _shipmentRepository.GetShipmentByIdAsync(id);
+            var shipment = await _context.Shipments.FindAsync(id);
             if (shipment == null)
             {
                 return NotFound();
@@ -175,7 +174,7 @@ namespace WebApplication1.Controllers
                 shipment.CurrentAddress = statusUpdate.CurrentAddress;
             }
             
-            await _shipmentRepository.UpdateShipmentAsync(shipment);
+            await _context.SaveChangesAsync();
 
             return Ok(shipment);
         }
@@ -184,32 +183,31 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteShipment(int id)
         {
-            var shipment = await _shipmentRepository.GetShipmentByIdAsync(id);
+            var shipment = await _context.Shipments.FindAsync(id);
             if (shipment == null)
             {
                 return NotFound();
             }
 
-            await _shipmentRepository.DeleteShipmentAsync(id);
+            _context.Shipments.Remove(shipment);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
-        // POST: api/Shipment/otp/5
         [HttpPost("otp/{shipmentId}")]
         public async Task<ActionResult<DeliveryOtp>> CreateDeliveryOtp(int shipmentId)
         {
-            var shipment = await _shipmentRepository.GetShipmentByIdAsync(shipmentId);
+            var shipment = await _context.Shipments.FindAsync(shipmentId);
             if (shipment == null)
             {
-                return NotFound($"Shipment with ID {shipmentId} not found");
+                return NotFound("Shipment not found.");
             }
 
-            // Find the associated user
+            // Get user details for SMS
             var user = await _context.Users.FindAsync(shipment.UserId);
             if (user == null)
             {
-                return NotFound($"User associated with shipment {shipmentId} not found");
+                return NotFound("User not found.");
             }
 
             Console.WriteLine($"Creating OTP for shipment {shipmentId}, user email: {user.Email}, phone: {user.PhoneNumber}");
@@ -217,55 +215,58 @@ namespace WebApplication1.Controllers
             // Generate OTP
             var otp = new DeliveryOtp
             {
-                Otp = this._trackingService.GenerateOtp(),
+                Otp = _trackingService.GenerateOtp(),
                 ShipmentId = shipmentId
             };
 
-            await _otpRepository.CreateOtpAsync(otp);
+            _context.DeliveryOtps.Add(otp);
+            await _context.SaveChangesAsync();
 
-            // Try to send email notification - don't fail if email service is down
+            Console.WriteLine($"Generated OTP: {otp.Otp}");
+
+            // Try to send OTP via email - don't fail if email service is down
             try
             {
-                Console.WriteLine($"Attempting to send OTP email to: {shipment.UserEmail}");
+                Console.WriteLine($"Attempting to send email to: {shipment.UserEmail}");
                 string emailBody = $@"
                     <html>
-                    <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
-                        <div style='background-color: #f8f9fa; padding: 20px; text-align: center;'>
-                            <h1 style='color: #0d6efd;'>Your SmartTracking Delivery OTP</h1>
+                    <body style='font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;'>
+                        <div style='background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b); padding: 20px; border-radius: 10px; text-align: center; color: white;'>
+                            <h1 style='margin: 0;'>SmartTracking</h1>
                         </div>
-                        <div style='padding: 20px; background-color: white;'>
-                            <p>Hello,</p>
-                            <p>Your OTP code for shipment <strong>{shipment.TrackingId}</strong> is:</p>
-                            <div style='background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;'>
+                        <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;'>
+                            <h2 style='color: #333;'>Your Delivery OTP Code</h2>
+                            <p style='font-size: 16px; color: #555;'>Hello {shipment.RecipientName},</p>
+                            <p style='font-size: 16px; color: #555;'>Use the following OTP code to confirm the delivery of your parcel (Tracking ID: {shipment.TrackingId}):</p>
+                            <div style='font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 30px 0; color: #333; background: #e9ecef; padding: 15px; border-radius: 5px;'>
                                 {otp.Otp}
                             </div>
-                            <p>This code will be required by the delivery person to confirm delivery.</p>
-                            <p>If you didn't request this code, please contact our support team immediately.</p>
-                            <p>Thank you for using SmartTracking!</p>
+                            <p style='font-size: 14px; color: #777;'>This OTP is valid for a limited time. Do not share this code with anyone.</p>
                         </div>
-                        <div style='text-align: center; padding: 20px; font-size: 12px; color: #6c757d;'>
+                        <div style='text-align: center; margin-top: 20px; color: #777; font-size: 14px;'>
                             <p>© {DateTime.Now.Year} SmartTracking. All rights reserved.</p>
                         </div>
                     </body>
                     </html>";
 
-                await this._emailService.SendEmailAsync(shipment.UserEmail, "SmartTracking - Delivery OTP", emailBody);
+                await _emailService.SendEmailAsync(shipment.UserEmail, "SmartTracking - Delivery OTP", emailBody);
                 Console.WriteLine("Email sent successfully");
             }
             catch (Exception ex)
             {
                 // Log the email error but don't fail the OTP creation
-                Console.WriteLine($"Email notification failed: {ex.Message}");
+                Console.WriteLine($"Email notification failed for OTP {otp.Otp}: {ex.Message}");
+                Console.WriteLine($"Email error details: {ex}");
             }
 
-            // Try to send SMS notification if phone number exists - don't fail if SMS service is down
+            // Try to send OTP via SMS if phone number exists - don't fail if SMS service is down
             try
             {
                 if (!string.IsNullOrEmpty(user.PhoneNumber))
                 {
                     Console.WriteLine($"Attempting to send SMS to: {user.PhoneNumber}");
                     string smsMessage = $"SmartTracking: Your delivery OTP for parcel {shipment.TrackingId} is: {otp.Otp}. This code is valid for a limited time. Do not share it with anyone.";
-                    await this._smsService.SendSmsAsync(user.PhoneNumber, smsMessage);
+                    await _smsService.SendSmsAsync(user.PhoneNumber, smsMessage);
                     Console.WriteLine("SMS sent successfully");
                 }
                 else
@@ -276,38 +277,41 @@ namespace WebApplication1.Controllers
             catch (Exception ex)
             {
                 // Log the SMS error but don't fail the OTP creation
-                Console.WriteLine($"SMS notification failed: {ex.Message}");
+                Console.WriteLine($"SMS notification failed for OTP {otp.Otp}: {ex.Message}");
+                Console.WriteLine($"SMS error details: {ex}");
             }
 
             return CreatedAtAction(nameof(GetShipment), new { id = shipmentId }, otp);
         }
-
-        // POST: api/Shipment/otp/verify/{shipmentId}
         [HttpPost("otp/verify/{shipmentId}")]
         public async Task<IActionResult> VerifyDeliveryOtp(int shipmentId, [FromBody] string otpCode)
         {
-            var otp = await _otpRepository.GetByShipmentIdAndOtpAsync(shipmentId, otpCode, false);
-                
+            var otp = await _context.DeliveryOtps
+                .FirstOrDefaultAsync(o => o.ShipmentId == shipmentId && o.Otp == otpCode && !o.IsUsed);
+
             if (otp == null)
             {
-                return BadRequest("Invalid OTP or OTP has already been used");
+                return BadRequest("Invalid or already used OTP.");
             }
-            
+
             // Mark OTP as used
             otp.IsUsed = true;
-            await _otpRepository.UpdateOtpAsync(otp);
-            
-            // Update shipment status to Delivered
-            var shipment = await _shipmentRepository.GetShipmentByIdAsync(shipmentId);
-            if (shipment != null)
-            {
-                shipment.Status = "Delivered";
-                await _shipmentRepository.UpdateShipmentAsync(shipment);
-            }
-            
-            return Ok(new { success = true, message = "OTP verified successfully" });
+            _context.Shipments
+                .Where(s => s.Id == shipmentId)
+                .ToList()
+                .ForEach(s => s.Status = "Delivered"); // Update shipment status to Delivered
+            await _context.SaveChangesAsync();
+
+            return Ok("OTP verified successfully.");
+        }
+
+
+        private bool ShipmentExists(int id)
+        {
+            return _context.Shipments.Any(e => e.Id == id);
         }
     }
+    
 
     public class ShipmentStatusUpdate
     {

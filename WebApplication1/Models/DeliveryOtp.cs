@@ -20,5 +20,7 @@ namespace WebApplication1.Models
         public virtual Shipment? Shipment { get; set; }
         
         public bool IsUsed { get; set; } = false;
+        
+        public DateTime? UsedAt { get; set; }
     }
 }

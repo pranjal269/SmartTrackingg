@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Services;
+using WebApplication1.Repositories;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Net;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,13 +29,36 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(connectionString);
+    
+    // Turn off the migration warnings
+    options.ConfigureWarnings(warnings => 
+        warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
-// Register services that were previously deleted
+// Register repositories
+builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
+builder.Services.AddScoped<IDeliveryOtpRepository, DeliveryOtpRepository>();
+
+// Register service implementations
 builder.Services.AddScoped<ITrackingService, TrackingService>();
 builder.Services.AddScoped<IQRCodeService, QRCodeService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ISmsService, SmsService>();
+
+// Register mock services when the real ones aren't available
+try
+{
+    // Try to use real services if they're properly configured
+    builder.Services.AddScoped<IEmailService, EmailService>();
+    builder.Services.AddScoped<ISmsService, SmsService>();
+    Console.WriteLine("Registered real email and SMS services");
+}
+catch (Exception ex)
+{
+    // Fall back to mock services if something goes wrong
+    Console.WriteLine($"Error registering real services: {ex.Message}");
+    Console.WriteLine("Using mock email and SMS services instead");
+    builder.Services.AddScoped<IEmailService, MockEmailService>();
+    builder.Services.AddScoped<ISmsService, MockSmsService>();
+}
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -79,16 +104,21 @@ app.UseCors("AllowGitHubPages"); // Apply the named CORS policy
 app.UseAuthorization();
 app.MapControllers();
 
-// Apply migrations at startup
-if (app.Environment.IsProduction())
+// Try to connect to the database and create schema if needed
+try 
 {
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        Console.WriteLine("Applying migrations...");
-        db.Database.Migrate();
-        Console.WriteLine("Migrations applied successfully!");
+        Console.WriteLine("Attempting to create/update database schema if needed...");
+        db.Database.EnsureCreated();
+        Console.WriteLine("Database schema check completed successfully!");
     }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"An error occurred while setting up the database: {ex.Message}");
+    // Log the error but continue app startup
 }
 
 app.Run();

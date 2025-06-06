@@ -7,3 +7,13 @@
 /Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cache
 /Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.RazorAssemblyInfo.cache
 /Users/dev16/temp_project/obj/Debug/net8.0/WebApplication1.RazorAssemblyInfo.cs
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.csproj.AssemblyReference.cache
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.Resources.dummy.resources
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.csproj.GenerateResource.cache
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.GeneratedMSBuildEditorConfig.editorconfig
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.AssemblyInfoInputs.cache
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.AssemblyInfo.cs
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.csproj.CoreCompileInputs.cache
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cs
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cache
+/Users/pranjalagarwal/Documents/smartTrackingfinal/SmartTrackingg/WebApplication1/obj/Debug/net8.0/WebApplication1.sourcelink.json

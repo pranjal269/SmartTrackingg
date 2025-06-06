@@ -44,5 +44,9 @@ namespace WebApplication1.Models
 
         // QR Code as string (Base64 encoded image)
         public string? QRCodeImage { get; set; }
+        
+        // This property is not mapped to the database
+        [NotMapped]
+        public DateTime? DeliveryDate { get; set; }
     }
 }
