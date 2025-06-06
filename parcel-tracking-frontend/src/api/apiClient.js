@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configure your ngrok URL here (replace with your actual ngrok URL)
-const NGROK_URL = 'https://f63e-103-180-214-187.ngrok-free.app'; // Example: 'https://a1b2-c3d4-e5f6.ngrok-free.app/api'
+const NGROK_URL = 'https://f63e-103-180-214-187.ngrok-free.app/api'; // Example: 'https://a1b2-c3d4-e5f6.ngrok-free.app/api'
 const AZURE_URL = 'https://smart-tracking-backend.azurewebsites.net/api';
 
 // Use ngrok for development and Azure as fallback
